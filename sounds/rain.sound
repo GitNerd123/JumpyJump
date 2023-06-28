@@ -1,0 +1,15 @@
+{
+  "UI": false,
+  "Volume": "1.00,1.00,1",
+  "Pitch": "1.00,1.00,1",
+  "Decibels": 75,
+  "SelectionMode": "Random",
+  "Sounds": [
+    "sounds/ste-000.vsnd",
+    "sounds/ste-001.vsnd",
+    "sounds/ste-002.vsnd",
+    "sounds/ste-004.vsnd"
+  ],
+  "MaximumDistance": 1308.4543,
+  "MinimumDistance": 65.42272
+}
