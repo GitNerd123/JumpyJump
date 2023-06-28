@@ -8,7 +8,7 @@ namespace MyGame
     {
         public int StepSize => 24;
         public int GroundAngle => 45;
-        public int JumpSpeed => 300;
+        public int JumpSpeed => 400;
         public float Gravity => 800f;
 
         HashSet<string> ControllerEvents = new(StringComparer.OrdinalIgnoreCase);
@@ -67,7 +67,6 @@ namespace MyGame
             // Engine.Renderer.DrawText("Speed: " + Entity.Velocity.Length.FloorToInt(), new Vector2(Screen.Width - 100, Screen.Height - 40), Color.White, 12);
 
             // Check for vaulting
-            if (Grounded && Input.Down("vault") && !HasEvent("vault"))
             {
                 var trace = Entity.TraceBBox(Entity.Position, Entity.Position + Vector3.Up * StepSize);
                 if (trace.Hit && Vector3.GetAngle(Vector3.Up, trace.Normal) <= GroundAngle)
