@@ -8,7 +8,7 @@ namespace MyGame
     {
         public int StepSize => 24;
         public int GroundAngle => 45;
-        public int JumpSpeed => 400;
+        public int JumpSpeed => 450; // Adjust the jump speed to control the vaulting height
         public float Gravity => 800f;
 
         HashSet<string> ControllerEvents = new(StringComparer.OrdinalIgnoreCase);
@@ -82,8 +82,9 @@ namespace MyGame
             // Calculate the vault direction based on the target position
             var vaultDirection = (vaultTarget - Entity.Position).Normal;
 
-            // Apply an upward impulse to lift the player during the vault
-            Entity.Velocity += Vector3.Up * JumpSpeed;
+            // Adjust the jump speed to control the vaulting height
+            int vaultJumpSpeed = 800; // Set your desired vault jump speed here
+            Entity.Velocity += Vector3.Up * vaultJumpSpeed;
 
             // Move the player towards the vault target position
             Entity.Position = vaultTarget;
