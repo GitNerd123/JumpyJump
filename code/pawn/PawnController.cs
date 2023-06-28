@@ -8,7 +8,7 @@ namespace MyGame
     {
         public int StepSize => 24;
         public int GroundAngle => 45;
-        public int JumpSpeed => 400; // Adjust the jump speed to control the vaulting height
+        public int JumpSpeed => 450; // Adjust the jump speed to control the vaulting height
         public float Gravity => 800f;
 
         HashSet<string> ControllerEvents = new(StringComparer.OrdinalIgnoreCase);
