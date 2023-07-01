@@ -1,6 +1,7 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MyGame
 {
@@ -20,9 +21,11 @@ namespace MyGame
 
         bool Grounded => Entity.GroundEntity.IsValid();
 
-		public int Velocity { get; internal set; }
+        public int Velocity { get; internal set; }
 
-		public void Simulate(IClient cl)
+        public string ParticleEffect { get; set; } = "particles/explosion_fireball.vpcf"; // Set your desired particle effect path here
+
+        public void Simulate(IClient cl)
         {
             ControllerEvents.Clear();
 
@@ -30,6 +33,24 @@ namespace MyGame
             var angles = Entity.ViewAngles.WithPitch(0);
             var moveVector = Rotation.From(angles) * movement * 320f;
             var groundEntity = CheckForGround();
+
+            if (Input.Down("duck"))
+            {
+                // Push the player down to the ground
+                if (!Grounded)
+                {
+                    Entity.Velocity = Entity.Velocity.WithZ(-1000); // Adjust the downward velocity as needed
+                }
+                else
+                {
+                    // Create the particle effect when ducking and hitting the ground
+                    if (!HasEvent("duckhit"))
+                    {
+                        CreateParticleEffect();
+                        AddEvent("duckhit");
+                    }
+                }
+            }
 
             if (groundEntity.IsValid())
             {
@@ -70,7 +91,7 @@ namespace MyGame
             Entity.GroundEntity = groundEntity;
 
             // Render the speed on the HUD
-        //    Engine.Renderer.DrawText("Speed: " + Entity.Velocity.Length.FloorToInt(), new Vector2(Screen.Width - 100, Screen.Height - 40), Color.White, 12);
+            //    Engine.Renderer.DrawText("Speed: " + Entity.Velocity.Length.FloorToInt(), new Vector2(Screen.Width - 100, Screen.Height - 40), Color.White, 12);
 
             // Check for vaulting
             {
@@ -234,5 +255,21 @@ namespace MyGame
 
             ControllerEvents.Add(eventName);
         }
+
+void CreateParticleEffect()
+{
+    if (string.IsNullOrEmpty(ParticleEffect))
+        return;
+
+    var effect = Particles.Create(ParticleEffect, Entity.Position);
+    DelayedDestroy(effect, 2.0f); // DelayedDestroy is a custom function to destroy the effect after a specified duration
+}
+
+async void DelayedDestroy(Particles effect, float duration)
+{
+    await Task.Delay((int)(duration * 1000)); // Convert duration to milliseconds
+    effect.Destroy();
+}
+
     }
 }
