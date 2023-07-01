@@ -1,4 +1,4 @@
-﻿using Sandbox;
+﻿﻿using Sandbox;
 using System.ComponentModel;
 
 namespace MyGame;
@@ -192,4 +192,3 @@ public partial class Pawn : AnimatedEntity
 		Rotation = ViewAngles.WithPitch( 0f ).ToRotation();
 	}
 }
-
