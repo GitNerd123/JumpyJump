@@ -8,14 +8,21 @@ namespace MyGame
     {
         public int StepSize => 24;
         public int GroundAngle => 45;
-        public int JumpSpeed => 500; // Adjust the jump speed to control the vaulting height
+        public int JumpSpeed => 600; // Adjust the jump speed to control the vaulting height
         public float Gravity => 800f;
+        public float AirAcceleration => 1500f; // Adjust air acceleration for better air control
+        public float AirFriction => 0.5f; // Adjust air friction for better air control
+        public float DashDistance => 500f; // Adjust the dash distance
+        public float DashCooldown => 10f; // Adjust the dash cooldown time in seconds
 
         HashSet<string> ControllerEvents = new(StringComparer.OrdinalIgnoreCase);
+        float lastDashTime = 0f;
 
         bool Grounded => Entity.GroundEntity.IsValid();
 
-        public void Simulate(IClient cl)
+		public int Velocity { get; internal set; }
+
+		public void Simulate(IClient cl)
         {
             ControllerEvents.Clear();
 
@@ -62,9 +69,8 @@ namespace MyGame
 
             Entity.GroundEntity = groundEntity;
 
-            // Replace this comment with your code to render the speed on the HUD
-            // Example:
-            // Engine.Renderer.DrawText("Speed: " + Entity.Velocity.Length.FloorToInt(), new Vector2(Screen.Width - 100, Screen.Height - 40), Color.White, 12);
+            // Render the speed on the HUD
+        //    Engine.Renderer.DrawText("Speed: " + Entity.Velocity.Length.FloorToInt(), new Vector2(Screen.Width - 100, Screen.Height - 40), Color.White, 12);
 
             // Check for vaulting
             {
@@ -74,6 +80,13 @@ namespace MyGame
                     // Perform vaulting
                     PerformVault(trace.EndPosition);
                 }
+            }
+
+            // Check for dashing
+            if (Input.Down("run") && Time.Now - lastDashTime >= DashCooldown)
+            {
+                lastDashTime = Time.Now;
+                DoDash(angles);
             }
         }
 
@@ -99,6 +112,13 @@ namespace MyGame
             {
                 Entity.Velocity = ApplyJump(Entity.Velocity, "jump");
             }
+        }
+
+        void DoDash(Angles viewAngles)
+        {
+            var dashDirection = Rotation.From(viewAngles).Forward;
+            Entity.Velocity += dashDirection * DashDistance;
+            AddEvent("dash");
         }
 
         Entity CheckForGround()
@@ -159,6 +179,18 @@ namespace MyGame
                 accelspeed = addspeed;
 
             input += wishdir * accelspeed;
+
+            // Check if the player is air strafing
+            if (!Grounded && input.Length < wishspeed)
+            {
+                var airControl = wishspeed - input.Length;
+                var airAccel = airControl * AirAcceleration * Time.Delta;
+
+                if (airAccel > addspeed)
+                    airAccel = addspeed;
+
+                input += wishdir * airAccel;
+            }
 
             return input;
         }
