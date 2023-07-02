@@ -7,9 +7,9 @@ namespace MyGame
 {
     public class PawnController : EntityComponent<Pawn>
     {
-        public int StepSize => 24;
+        public int StepSize => 35;
         public int GroundAngle => 45;
-        public int JumpSpeed => 600; // Adjust the jump speed to control the vaulting height
+        public int JumpSpeed => 400; // Adjust the jump speed to control the vaulting height
         public float Gravity => 800f;
         public float AirAcceleration => 1500f; // Adjust air acceleration for better air control
         public float AirFriction => 0.5f; // Adjust air friction for better air control
@@ -33,24 +33,6 @@ namespace MyGame
             var angles = Entity.ViewAngles.WithPitch(0);
             var moveVector = Rotation.From(angles) * movement * 320f;
             var groundEntity = CheckForGround();
-
-            if (Input.Down("duck"))
-            {
-                // Push the player down to the ground
-                if (!Grounded)
-                {
-                    Entity.Velocity = Entity.Velocity.WithZ(-1000); // Adjust the downward velocity as needed
-                }
-                else
-                {
-                    // Create the particle effect when ducking and hitting the ground
-                    if (!HasEvent("duckhit"))
-                    {
-                        CreateParticleEffect();
-                        AddEvent("duckhit");
-                    }
-                }
-            }
 
             if (groundEntity.IsValid())
             {
@@ -110,22 +92,28 @@ namespace MyGame
                 DoDash(angles);
             }
         }
+void PerformVault(Vector3 vaultTarget)
+{
+    var vaultDirection = (vaultTarget - Entity.Position).Normal;
 
-        void PerformVault(Vector3 vaultTarget)
-        {
-            // Calculate the vault direction based on the target position
-            var vaultDirection = (vaultTarget - Entity.Position).Normal;
+    // Adjust the jump speed to control the vaulting height if grounded or in the air
+    int vaultJumpSpeed = Grounded ? 350 : 600;
+    Entity.Velocity += Vector3.Up * vaultJumpSpeed;
 
-            // Adjust the jump speed to control the vaulting height
-            int vaultJumpSpeed = 350; // Set your desired vault jump speed here
-            Entity.Velocity += Vector3.Up * vaultJumpSpeed;
+    // Check if the pawn can see over the object
+    var visibilityTrace = Entity.TraceBBox(Entity.Position + Vector3.Up * StepSize, vaultTarget);
+    bool canSeeOverObject = !visibilityTrace.Hit;
 
-            // Move the player towards the vault target position
-            Entity.Position = vaultTarget;
+    if (canSeeOverObject)
+    {
+        // Move the player towards the vault target position
+        Entity.Position = vaultTarget;
 
-            // Add a vault event
-            AddEvent("vault");
-        }
+        // Add a vault event
+        AddEvent("vault");
+    }
+}
+
 
         void DoJump()
         {
@@ -256,20 +244,19 @@ namespace MyGame
             ControllerEvents.Add(eventName);
         }
 
-void CreateParticleEffect()
-{
-    if (string.IsNullOrEmpty(ParticleEffect))
-        return;
+        void CreateParticleEffect()
+        {
+            if (string.IsNullOrEmpty(ParticleEffect))
+                return;
 
-    var effect = Particles.Create(ParticleEffect, Entity.Position);
-    DelayedDestroy(effect, 2.0f); // DelayedDestroy is a custom function to destroy the effect after a specified duration
-}
+            var effect = Particles.Create(ParticleEffect, Entity.Position);
+            DelayedDestroy(effect, 2.0f); // DelayedDestroy is a custom function to destroy the effect after a specified duration
+        }
 
-async void DelayedDestroy(Particles effect, float duration)
-{
-    await Task.Delay((int)(duration * 1000)); // Convert duration to milliseconds
-    effect.Destroy();
-}
-
+        async void DelayedDestroy(Particles effect, float duration)
+        {
+            await Task.Delay((int)(duration * 1000)); // Convert duration to milliseconds
+            effect.Destroy();
+        }
     }
 }
