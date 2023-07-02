@@ -12,8 +12,8 @@ namespace MyGame
         public int JumpSpeed => 600; // Adjust the jump speed to control the vaulting height
         public float Gravity => 800f;
         public float AirAcceleration => 1500f; // Adjust air acceleration for better air control
-        public float AirFriction => 1f; // Adjust air friction for better air control
-        public float DashDistance => 500f; // Adjust the dash distance
+        public float AirFriction => 0.5f; // Adjust air friction for better air control
+        public float DashDistance => 200f; // Adjust the dash distance
         public float DashCooldown => 10f; // Adjust the dash cooldown time in seconds
 
         HashSet<string> ControllerEvents = new(StringComparer.OrdinalIgnoreCase);
